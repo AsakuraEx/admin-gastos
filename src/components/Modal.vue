@@ -26,17 +26,21 @@
             type: String,
             required:true
         },
+        disponible: {
+            type:Number,
+            required:true
+        }
     })
-    defineEmits(['ocultar-modal', 'update:nombre', 'update:cantidad', 'update:categoria']);
+    const emit = defineEmits(['ocultar-modal', 'guardar-gasto', 'update:nombre', 'update:cantidad', 'update:categoria']);
 
     const agregarGasto = () => {
        //Validar que no hay campos vacios
-       const {cantidad, categoria, nombre} = props
+       const {cantidad, categoria, nombre, disponible} = props
        if([nombre,cantidad,categoria].includes('')){
         error.value = 'Todos los campos son obligatorios';
         setTimeout(()=>{
             error.value = '';
-        },2000);
+        },3000);
         return;
        }
 
@@ -44,11 +48,20 @@
         error.value = 'Ingrese un valor mayor a cero';
         setTimeout(()=>{
             error.value = '';
-        },2000);
+        },3000);
         return;
        }
 
-       console.log('Emitiendo gasto')
+       if(cantidad > disponible){
+        error.value = 'No cuenta con el dinero suficiente para realizar este gasto';
+        setTimeout(()=>{
+            error.value = '';
+        },3000);
+        return;
+       }
+
+
+       emit('guardar-gasto');
     }
 </script>
 
@@ -107,9 +120,10 @@
                         <option value="ahorro">Ahorro</option>
                         <option value="comida">Comida</option>
                         <option value="casa">Casa</option>
-                        <option value="gastos-varios">Gastos Varios</option>
+                        <option value="gastos">Gastos Varios</option>
                         <option value="ocio">Ocio</option>
                         <option value="salud">Salud</option>
+                        <option value="suscripciones">Suscripciones</option>
                     </select>
                 </div>
 
