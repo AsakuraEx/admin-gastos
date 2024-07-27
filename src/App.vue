@@ -32,7 +32,12 @@
         const totalGastado = gastos.value.reduce((total, gasto) => gasto.cantidad + total, 0);
         gastado.value = totalGastado;
         disponible.value = presupuesto.value - gastado.value;
-        console.log(totalGastado);
+    }, { deep:true });
+
+    watch(modal, ()=>{
+        if(!modal.mostrar){
+            reiniciarGasto();
+        }
     }, { deep:true });
 
     const definirPresupuesto = (cantidad) => {
@@ -56,23 +61,41 @@
     }
 
     const guardarGasto = () => {
-        console.log('Desde App.vue');
-        gastos.value.push({
-            ...gasto,
-            id: generarId()
-        });
+        if(gasto.id){
+            //Editando
+            const { id } = gasto;
+            const i = gastos.value.findIndex((gasto => gasto.id === id));
+            gastos.value[i] = {...gasto}
+        }else{
+            //Registro Nuevo
+            gastos.value.push({
+                ...gasto,
+                id: generarId()
+            });
+        }
+
         
         ocultarModal();
 
         //Reiniciando el objeto
+        reiniciarGasto();
+
+    }
+
+    const reiniciarGasto = () => {
         Object.assign(gasto, {
             nombre: '',
             cantidad: '',
             categoria: '',
             fecha: Date.now(),
             id: null
-        })
+        });
+    }
 
+    const seleccionarGasto = (id) => {
+        const gastoEditar = gastos.value.filter(gasto => gasto.id === id)[0];
+        Object.assign(gasto,gastoEditar);
+        mostrarModal();
     }
 
 </script>
@@ -106,6 +129,7 @@
                     v-for="item in gastos"
                     :key="gasto.id"
                     :gasto="item"
+                    @seleccionar-gasto="seleccionarGasto"
                 />
             </div>
 
