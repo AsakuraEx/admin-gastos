@@ -93,9 +93,16 @@
     }
 
     const seleccionarGasto = (id) => {
-        const gastoEditar = gastos.value.filter(gasto => gasto.id === id)[0];
+        const gastoEditar = gastos.value.filter(gastoState => gastoState.id === id)[0];
         Object.assign(gasto,gastoEditar);
         mostrarModal();
+    }
+
+    const eliminarGasto = (id) => {
+        if(confirm('Eliminar gasto?')){
+            gastos.value = gastos.value.filter(gastoState => gastoState.id !== id);
+            ocultarModal();
+        }
     }
 
 </script>
@@ -145,8 +152,10 @@
                 v-if="modal.mostrar"
                 @ocultar-modal="ocultarModal"
                 @guardar-gasto="guardarGasto"
+                @eliminar-gasto="eliminarGasto"
                 :modal="modal"
                 :disponible="disponible"
+                :id="gasto.id"
                 v-model:nombre="gasto.nombre"
                 v-model:cantidad="gasto.cantidad"
                 v-model:categoria="gasto.categoria"
