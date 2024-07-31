@@ -1,5 +1,5 @@
 <script setup>
-    import { ref, reactive, watch, computed } from 'vue';
+    import { ref, reactive, watch, computed, onMounted } from 'vue';
     import { generarId } from './helpers';
     import Presupuesto from './components/Presupuesto.vue';
     import ControlPresupuesto from './components/ControlPresupuesto.vue';
@@ -34,6 +34,7 @@
         const totalGastado = gastos.value.reduce((total, gasto) => gasto.cantidad + total, 0);
         gastado.value = totalGastado;
         disponible.value = presupuesto.value - gastado.value;
+        localStorage.setItem('gastos', JSON.stringify(totalGastado));
     }, { deep:true });
 
     watch(modal, ()=>{
@@ -41,6 +42,25 @@
             reiniciarGasto();
         }
     }, { deep:true });
+
+    watch(presupuesto, ()=>{
+        localStorage.setItem('presupuesto', presupuesto.value);
+    });
+
+    onMounted(()=>{
+        const presupuestoAlmacenado = localStorage.getItem('presupuesto');
+        if(presupuestoAlmacenado){
+            presupuesto.value = Number(presupuestoAlmacenado);
+            disponible.value = Number(presupuestoAlmacenado);
+        }
+
+        const gastosAlmacenados = localStorage.getItem('gastos')
+        if(gastosAlmacenados){
+            gastos.value = JSON.parse(gastosAlmacenados);
+        }
+
+    })
+
 
     const definirPresupuesto = (cantidad) => {
         presupuesto.value = cantidad;
@@ -81,7 +101,6 @@
 
         //Reiniciando el objeto
         reiniciarGasto();
-
     }
 
     const reiniciarGasto = () => {
@@ -114,6 +133,14 @@
         return gastos.value
     });
 
+    const resetApp = () => {
+        if(confirm('¿Deseas reiniciar presupuesto y gastos?')){
+            gastos.value=[];
+            presupuesto.value = 0;
+        }
+    }
+
+
 </script>
 
 <template>
@@ -132,6 +159,7 @@
                     :presupuesto="presupuesto"
                     :disponible="disponible"
                     :gastado="gastado"
+                    @reset-app="resetApp"
                 />
             </div>
         </header>
